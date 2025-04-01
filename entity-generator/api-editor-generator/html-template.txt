@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#TOKE_PAGE_TITLE#</title>
+    <link rel="stylesheet" href="#TOKE_STYLESHEET#">
+</head>
+<body data-endpoint="#TOKE_CURRENT_ENDPOINT#">
+
+<h1>#TOKE_PAGE_HEADER#</h1>
+
+<div class="table-container">
+    <table id="dataTable">
+        <thead>
+        <tr>
+            <th onclick="sortTable('id')">ID ⬍</th>
+            <th onclick="sortTable('name')">Name ⬍</th>
+            <th onclick="sortTable('description')">Description ⬍</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div id="pagination"></div>
+
+<form id="dataForm">
+    <h3>Add / Update Ability</h3>
+    <input type="hidden" id="dataId">
+    <input type="text" id="dataName" placeholder="Ability Name" required>
+    <textarea id="dataDescription" placeholder="Ability Description" required></textarea>
+    <button type="submit">Save</button>
+    <button type="button" class="add-batch-btn" onclick="openBatchModal()">Add Batch 📝</button>
+</form>
+
+<!-- Modal for batch input -->
+<div id="batchModal" class="modal">
+    <div class="modal-content">
+        <h3>Enter Batch JSON</h3>
+        <textarea id="batchJsonInput" rows="10" cols="50" placeholder="Paste JSON here..."></textarea>
+        <br>
+        <button class="send-batch-btn" onclick="sendBatch()">Send Batch</button>
+        <button class="close-modal-btn" onclick="closeBatchModal()">Close</button>
+    </div>
+</div>
+
+<script src="#TOKE_SCRIPT_SRC#"></script>
+</body>
+</html>

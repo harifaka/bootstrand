@@ -1,0 +1,187 @@
+const apiBaseUrl = "#TOKE_API_BASE_URL#"; // Base API URL
+let currentEndpoint = "#TOKE_CURRENT_ENDPOINT#"; // Default endpoint
+let itemsPerPage = #TOKE_ITEMS_PER_PAGE#;
+let currentPage = 1;
+let dataItems = [];
+let sortField = "id"; // Default sort field
+let sortDirection = "asc"; // Default sort order
+
+// Initialize the script on page load
+document.addEventListener("DOMContentLoaded", function () {
+    // Get the endpoint from the HTML
+    const configElement = document.getElementById("config") || document.body;
+    currentEndpoint = configElement.dataset.endpoint || "#TOKE_CURRENT_ENDPOINT#"; // Use default if not set
+
+    fetchEntities(); // Fetch data based on endpoint
+});
+
+// Generic Fetch Function
+async function fetchData(endpoint, params = {}) {
+    let url = new URL(`${apiBaseUrl}/${endpoint}`);
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error:", error);
+        return null;
+    }
+}
+
+// Fetch Data from API with Sorting & Pagination
+async function fetchEntities() {
+    const params = {
+        page: currentPage - 1,
+        size: itemsPerPage,
+        sort: `${sortField},${sortDirection}`
+    };
+
+    const data = await fetchData(currentEndpoint, params);
+    if (data) {
+        dataItems = data.content || [];
+        updateTable();
+        updatePagination(data.totalPages);
+    }
+}
+
+// Update Table Dynamically with Psychedelic Backgrounds
+function updateTable() {
+    const tableBody = document.querySelector("#dataTable tbody");
+    tableBody.innerHTML = "";
+
+    if (dataItems.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="100%">No data available</td></tr>';
+        return;
+    }
+
+    // Extract headers dynamically
+    const headers = Object.keys(dataItems[0]);
+
+    dataItems.forEach(item => {
+        const row = document.createElement("tr");
+
+        // Generate random background crop positions
+        const xPos = Math.floor(Math.random() * 800);
+        const yPos = Math.floor(Math.random() * 344);
+
+        // Apply psychedelic background with tiling
+        row.style.background = "#TOKE_BACKGROUND_IMAGE#";
+        row.style.backgroundSize = "1600px 688px";
+        row.style.backgroundPosition = `-${xPos}px -${yPos}px`;
+
+        headers.forEach(field => {
+            const cell = document.createElement("td");
+            cell.textContent = item[field];
+            row.appendChild(cell);
+        });
+
+        // Add action buttons if ID exists
+        if (item.id) {
+            const actionCell = document.createElement("td");
+            actionCell.innerHTML = `
+                <button class="edit-btn" onclick="editEntity(${item.id})">Edit</button>
+                <button class="delete-btn" onclick="deleteEntity(${item.id})">Delete</button>
+            `;
+            row.appendChild(actionCell);
+        }
+
+        tableBody.appendChild(row);
+    });
+}
+
+// Update Pagination
+function updatePagination(totalPages) {
+    const paginationDiv = document.getElementById("pagination");
+    paginationDiv.innerHTML = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+        let btn = document.createElement("button");
+        btn.innerText = i;
+        btn.classList.add("pagination-btn");
+        if (i === currentPage) btn.style.fontWeight = "bold";
+        btn.onclick = () => {
+            if (i !== currentPage) {
+                currentPage = i;
+                fetchEntities();
+            }
+        };
+        paginationDiv.appendChild(btn);
+    }
+}
+
+// Handle Form Submission (Add / Update)
+document.getElementById("dataForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("dataId").value;
+    const formData = {};
+
+    // Get all input values dynamically
+    document.querySelectorAll("#dataForm input, #dataForm textarea").forEach(input => {
+        if (input.id && input.value.trim() !== "") {
+            formData[input.id.replace("data", "").toLowerCase()] = input.value.trim();
+        }
+    });
+
+    if (!formData.name || !formData.description) {
+        alert("Both name and description are required");
+        return;
+    }
+
+    const method = id ? "PUT" : "POST";
+    const url = id ? `${apiBaseUrl}/${currentEndpoint}/${id}` : `${apiBaseUrl}/${currentEndpoint}`;
+
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+            fetchEntities(); // Refetch data
+            document.getElementById("dataForm").reset();
+            document.getElementById("dataId").value = "";
+        } else {
+            alert("Error saving data");
+        }
+    } catch (error) {
+        console.error("Error saving data:", error);
+    }
+});
+
+// Edit Entity
+function editEntity(id) {
+    const entity = dataItems.find(a => a.id === id);
+    if (!entity) return;
+
+    Object.keys(entity).forEach(field => {
+        const input = document.getElementById("data" + field.charAt(0).toUpperCase() + field.slice(1));
+        if (input) input.value = entity[field];
+    });
+}
+
+// Delete Entity
+async function deleteEntity(id) {
+    if (!confirm("Are you sure you want to delete this item?")) return;
+
+    try {
+        const response = await fetch(`${apiBaseUrl}/${currentEndpoint}/${id}`, { method: "DELETE" });
+        if (response.ok) {
+            fetchEntities();
+        } else {
+            alert("Error deleting entity");
+        }
+    } catch (error) {
+        console.error("Error deleting entity:", error);
+    }
+}
+
+// Sorting
+function sortTable(field) {
+    sortField = field;
+    sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    fetchEntities();
+}

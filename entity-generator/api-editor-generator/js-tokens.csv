@@ -1,0 +1,5 @@
+TOKEN,DESCRIPTION,DEFAULT_VALUE
+#TOKE_API_BASE_URL#,Base API URL,http://localhost:8081/api
+#TOKE_CURRENT_ENDPOINT#,Default endpoint,abilities
+#TOKE_ITEMS_PER_PAGE#,Number of items per page,10
+#TOKE_BACKGROUND_IMAGE#,Background image URL or style,url('/images/psy-fractal.png') repeat
