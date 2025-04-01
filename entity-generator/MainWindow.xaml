@@ -74,14 +74,8 @@
             <ComboBoxItem Content="Select a project folder" IsSelected="True"/>
         </ComboBox>
 
-        <!-- Template File Selection -->
-        <ComboBox Name="TemplateSelector" Width="300" Height="30" 
-                  Grid.Row="1" SelectionChanged="TemplateSelector_SelectionChanged">
-            <ComboBoxItem Content="Select a template file" IsSelected="True"/>
-        </ComboBox>
-
         <!-- Tabbed Grid View -->
-        <TabControl Grid.Row="2">
+        <TabControl Grid.Row="2" Name="Tabs">
             <TabItem Header="Tokens">
                 <DataGrid Name="tokenGrid" AutoGenerateColumns="False" CanUserAddRows="False">
                     <DataGrid.Columns>

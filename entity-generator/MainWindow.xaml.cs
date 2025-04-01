@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace entity_generator
 {
@@ -58,45 +60,64 @@ namespace entity_generator
         // Event handler when the selection in ComboBox changes
         private void ProjectSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
+            // Ensure a valid item is selected and that Tag is not null
+            if (ProjectSelector.SelectedItem is ComboBoxItem selectedItem)
+            {
+                // Check if the Tag is not null
+                if (selectedItem.Tag != null)
+                {
+                    // Get the selected directory from the Tag property
+                    selectedProjectPath = selectedItem.Tag.ToString();
+
+                    // Load templates when a folder is selected
+                    if (!string.IsNullOrEmpty(selectedProjectPath))
+                    {
+                        LoadTemplates();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("The selected item does not have a valid directory path.");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Please select a valid project folder.");
+            }
         }
 
-        // Event triggered when a template is selected
-        private void TemplateSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // Method to load templates (or perform other actions) based on the selected folder
+        // Method to load templates (or perform other actions) based on the selected folder
+        private void LoadTemplates()
         {
-        }
+            // Clear any existing tabs
+            Tabs.Items.Clear();
 
-        // Reset Button Click Event - Reset the token values
-        private void ResetButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Reload the tokens 
-        }
-
-        private void GenerateButton_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
-
-            // Method to load templates (or perform other actions) based on the selected folder
-            private void LoadTemplates()
-        {
-            // This is where you would load templates based on the selected folder.
-            // You can use the `selectedProjectPath` to find template files inside the selected folder.
-            // For now, we can show a message to indicate that templates would be loaded here.
-
-            MessageBox.Show($"Loading templates for project at: {selectedProjectPath}");
-
-            // Example logic to load files (you can modify this to match your template loading logic)
             try
             {
-                // List all files in the selected folder (e.g., template files)
-                string[] files = Directory.GetFiles(selectedProjectPath);
+                // List all .csv files in the selected folder (e.g., template files)
+                string[] files = Directory.GetFiles(selectedProjectPath, "*.csv");
 
-                // Do something with the files (e.g., display them in a DataGrid or other UI elements)
-                // This is just an example of showing a list of file names
+                // Create a Tab for each CSV file
                 foreach (var file in files)
                 {
-                    Console.WriteLine(Path.GetFileName(file)); // Just an example
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+                    var tabItem = new TabItem { Header = fileNameWithoutExtension };
+
+                    // Create a DataGrid for the CSV file
+                    var dataGrid = new DataGrid { AutoGenerateColumns = true, CanUserAddRows = false };
+
+                    // Read the CSV file and load the data into the DataGrid
+                    var csvData = LoadCsvData(file);
+
+                    // Bind the DataGrid to the csvData
+                    dataGrid.ItemsSource = csvData;
+
+                    // Set the DataGrid as the content of the TabItem
+                    tabItem.Content = dataGrid;
+
+                    // Add the TabItem to the TabControl
+                    Tabs.Items.Add(tabItem);
                 }
             }
             catch (Exception ex)
@@ -105,18 +126,67 @@ namespace entity_generator
             }
         }
 
-        // You can add additional event handlers for other buttons or functionality here, if needed.
 
-        // Example Button Click Event (resetting templates or handling other actions)
-        private void Button1_Click(object sender, RoutedEventArgs e)
+        // Method to read CSV data and return a list of CsvRow objects
+        private List<CsvRow> LoadCsvData(string filePath)
+        {
+            var csvData = new List<CsvRow>();
+
+            try
+            {
+                var lines = File.ReadAllLines(filePath);
+
+                // Ensure there's at least the header row
+                if (lines.Length > 1)
+                {
+                    // Loop through all lines (skip the header row)
+                    for (int i = 1; i < lines.Length; i++)
+                    {
+                        var values = lines[i].Split(',');
+
+                        // Check if there are exactly 3 columns (Token, Description, Default_Value)
+                        if (values.Length == 3)
+                        {
+                            var row = new CsvRow
+                            {
+                                Token = values[0],
+                                Description = values[1],
+                                DefaultValue = values[2]
+                            };
+
+                            csvData.Add(row);
+                        }
+                        else
+                        {
+                            // Optionally log invalid rows if needed
+                            // MessageBox.Show($"Skipping row {i + 1} due to invalid column count.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any file read errors
+                // MessageBox.Show($"Error reading CSV file: {ex.Message}");
+            }
+
+            return csvData;
+        }
+
+        // Button Click Events (Reset, Generate) - Implement as needed
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Reset Button Clicked!");
         }
 
-        // Another Button Click Event (e.g., to generate or process templates)
-        private void Button2_Click(object sender, RoutedEventArgs e)
+        private void GenerateButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Generate Button Clicked!");
+        }
+
+        private void TemplateSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }
