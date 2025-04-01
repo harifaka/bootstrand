@@ -19,8 +19,8 @@ ReleasePublic/
 
 # Uncomment if you have files that are created during the build process
 # and that should not be tracked by git (e.g., temporary generated files)
-# bin/
-# obj/
+bin/
+obj/
 
 # Windows Installer files
 *.cab
