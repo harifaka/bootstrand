@@ -60,10 +60,10 @@ namespace entity_generator
         // Event handler when the selection in ComboBox changes
         private void ProjectSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Ensure a valid item is selected and that Tag is not null
+            // Check if there's a valid selected item
             if (ProjectSelector.SelectedItem is ComboBoxItem selectedItem)
             {
-                // Check if the Tag is not null
+                // Ensure Tag is not null
                 if (selectedItem.Tag != null)
                 {
                     // Get the selected directory from the Tag property
@@ -77,17 +77,17 @@ namespace entity_generator
                 }
                 else
                 {
-                    MessageBox.Show("The selected item does not have a valid directory path.");
+                    //MessageBox.Show("The selected item does not have a valid directory path.");
                 }
             }
             else
             {
-                MessageBox.Show("Please select a valid project folder.");
+                // Optionally, handle this case only if there's an invalid initial selection
+                // MessageBox.Show("Please select a valid project folder.");
             }
         }
 
-        // Method to load templates (or perform other actions) based on the selected folder
-        // Method to load templates (or perform other actions) based on the selected folder
+
         private void LoadTemplates()
         {
             // Clear any existing tabs
@@ -105,7 +105,7 @@ namespace entity_generator
                     var tabItem = new TabItem { Header = fileNameWithoutExtension };
 
                     // Create a DataGrid for the CSV file
-                    var dataGrid = new DataGrid { AutoGenerateColumns = true, CanUserAddRows = false };
+                    var dataGrid = new DataGrid { AutoGenerateColumns = true, CanUserAddRows = false, IsReadOnly = false };
 
                     // Read the CSV file and load the data into the DataGrid
                     var csvData = LoadCsvData(file);
@@ -125,7 +125,6 @@ namespace entity_generator
                 MessageBox.Show($"Error loading files in the selected folder: {ex.Message}");
             }
         }
-
 
         // Method to read CSV data and return a list of CsvRow objects
         private List<CsvRow> LoadCsvData(string filePath)
@@ -173,20 +172,129 @@ namespace entity_generator
             return csvData;
         }
 
-        // Button Click Events (Reset, Generate) - Implement as needed
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Reset Button Clicked!");
+            // Re-load the project folders and templates like when the folder is selected
+            LoadProjectFolders();
+            if (!string.IsNullOrEmpty(selectedProjectPath))
+            {
+                LoadTemplates();
+            }
         }
 
         private void GenerateButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Generate Button Clicked!");
+            try
+            {
+                // Clear the existing tabs at the end, not at the beginning
+                // Tabs.Items.Clear(); // Remove this line from the beginning
+
+                // Loop through each CSV file in the selected project directory
+                string[] files = Directory.GetFiles(selectedProjectPath, "*.csv");
+
+                // Temporary storage for new tabs
+                var newTabs = new List<TabItem>();
+
+                foreach (var file in files)
+                {
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+                    var dataGrid = GetDataGridForTab(fileNameWithoutExtension);
+
+                    fileNameWithoutExtension = fileNameWithoutExtension.Split('-')[0];  // Handle -template naming
+                    var tabItem = new TabItem { Header = fileNameWithoutExtension };
+
+                    // Get the DataGrid for the current tab by matching the file name
+                    
+
+                    if (dataGrid != null)
+                    {
+                        // Extract the modified CSV data from the DataGrid
+                        var csvData = new List<CsvRow>();
+                        foreach (var item in dataGrid.ItemsSource)
+                        {
+                            if (item is CsvRow row)
+                            {
+                                csvData.Add(row);
+                            }
+                        }
+
+                        // Get the corresponding template file path
+                        var templateFilePath = Path.Combine(selectedProjectPath, $"{fileNameWithoutExtension}-template.txt");
+                        string templateContent = string.Empty;
+
+                        if (File.Exists(templateFilePath))
+                        {
+                            templateContent = File.ReadAllText(templateFilePath);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Template file not found for {fileNameWithoutExtension}", "Error");
+                            continue;
+                        }
+
+                        // Replace tokens in the template with the user-modified values from the DataGrid
+                        foreach (var row in csvData)
+                        {
+                            templateContent = templateContent.Replace(row.Token, row.DefaultValue);
+                        }
+
+                        // Create a TextBox to display the modified template content
+                        var textBox = new TextBox
+                        {
+                            Text = templateContent,
+                            IsReadOnly = true,
+                            AcceptsReturn = true,
+                            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+                        };
+
+                        // Set the TextBox as the content of the TabItem (replacing the DataGrid)
+                        tabItem.Content = textBox;
+
+                        // Add the TabItem to the temporary storage
+                        newTabs.Add(tabItem);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"DataGrid not found for the template {fileNameWithoutExtension}", "Error");
+                    }
+                }
+
+                // Now that the new tabs are prepared, clear the old ones and add the new ones
+                Tabs.Items.Clear();
+
+                // Add the newly generated tabs to the TabControl
+                foreach (var newTab in newTabs)
+                {
+                    Tabs.Items.Add(newTab);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                // Show a popup in case of an error
+                MessageBox.Show($"Error during generation: {ex.Message}", "Error");
+            }
         }
 
-        private void TemplateSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // Method to get the DataGrid corresponding to the selected file (tab)
+        private DataGrid GetDataGridForTab(string fileNameWithoutExtension)
         {
+            // Loop through each TabItem and check if it matches the file name
+            foreach (var tabItem in Tabs.Items)
+            {
+                if (tabItem is TabItem item && item.Header.ToString() == fileNameWithoutExtension)
+                {
+                    // Check the content of the TabItem (it should be a DataGrid)
+                    if (item.Content is DataGrid dataGrid)
+                    {
+                        return dataGrid;
+                    }
+                }
+            }
 
+            return null;
         }
+
     }
 }
