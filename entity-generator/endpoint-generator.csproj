@@ -9,6 +9,36 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="api-editor-generator\css-template.txt" />
+    <None Remove="api-editor-generator\css-tokens.csv" />
+    <None Remove="api-editor-generator\html-template.txt" />
+    <None Remove="api-editor-generator\html-tokens.csv" />
+    <None Remove="api-editor-generator\js-template.txt" />
+    <None Remove="api-editor-generator\js-tokens.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="api-editor-generator\css-template.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="api-editor-generator\css-tokens.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="api-editor-generator\html-template.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="api-editor-generator\html-tokens.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="api-editor-generator\js-template.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="api-editor-generator\js-tokens.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="data.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

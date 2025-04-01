@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "endpoint-generator": {
+      "commandName": "Project"
+    }
+  }
+}
