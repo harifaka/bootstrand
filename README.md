@@ -1,11 +1,11 @@
-# Bootstrand - The Ultimate Bootstrap Support 🚀
+# Bootstrand - The Ultimate Spring Boot Support 🚀
 
-Welcome to **Bootstrand**, the coolest tool for developers who want to generate Bootstrap templates with ease. 🚀
+Welcome to **Bootstrand**, the coolest tool for developers who want to generate Spring Boot templates with ease. 🚀
 
 ## What's This About? 🤔
-**Bootstrand** is a super nifty tool that helps developers easily generate Bootstrap templates with **dynamic tokens** using a modern, user-friendly interface built with **WPF (Windows Presentation Foundation)**. 
+**Bootstrand** is a super nifty tool that helps developers easily generate Spring Boot templates with **dynamic tokens** using a modern, user-friendly interface built with **WPF (Windows Presentation Foundation)**. 
 
-It’s designed to be your personal helper, making the process of working with Bootstrap faster, easier, and more efficient. Forget about wasting time with manual adjustments—just replace tokens in your templates and get the job done! 😎
+It’s designed to be your personal helper, making the process of working with Spring Boot faster, easier, and more efficient. Forget about wasting time with manual adjustments—just replace tokens in your templates and get the job done! 😎
 
 ### Features:
 - **Dynamic Template Selection**: Pick and load different project folders and templates.
